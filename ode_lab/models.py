@@ -1,3 +1,11 @@
+"""
+Example models for use in the ODE lab.
+
+Index:
+    - linear_ode, a simple linear ODE
+    - l63, the Lorenz 63 model
+"""
+
 import numpy as np
 
 
