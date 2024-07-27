@@ -68,21 +68,3 @@ jobs:
           comment_mode: off
           files: |
             test.xml
-
-      - name: Update Coverage Badge
-        run: |
-          COVERAGE="$(jq -r '.totals.percent_covered_display' coverage.json)"
-          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
-          IFS='/' read -ra PATHS <<< "$REF"
-          echo "BRANCH=$(echo ${PATHS[1]}_${PATHS[2]})" >> $GITHUB_ENV
-      - name: Create the Badge
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ vars.GIST_TOKEN }}
-          gistID: 5f6ae8b5a38d79248d55864560f13fd6
-          filename: feo-core__${{ env.BRANCH }}.json
-          label: Test Coverage
-          message: ${{ env.COVERAGE }}%
-          valColorRange: ${{ env.COVERAGE }}
-          maxColorRange: 100
-          minColorRange: 0
