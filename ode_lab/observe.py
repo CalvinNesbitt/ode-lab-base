@@ -88,7 +88,7 @@ class BaseObserver(Integrator):
         raise NotImplementedError
 
     @property
-    def packaged_observations(self) -> xr.Dataset:
+    def observations(self) -> xr.Dataset:
         """
         Package the observations into an xarray dataset.
 
@@ -174,7 +174,7 @@ class BaseObserver(Integrator):
             file_path.parent.mkdir(parents=True)
             logger.info(f"Making directory at {file_path.parent}")
 
-        nc_file = self.packaged_observations
+        nc_file = self.observations
         nc_file.to_netcdf(file_path)
         logger.info(
             f"Wrote {len(self._observations)} written to {file_path}. "
