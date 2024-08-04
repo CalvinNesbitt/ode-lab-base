@@ -6,8 +6,8 @@ import numpy as np
 import xarray as xr
 from tqdm import tqdm
 
-from ode_lab.integrate import Integrator
-from ode_lab.logger import logger
+from ode_lab.base.integrate import Integrator
+from ode_lab.base.logger import logger
 
 
 class BaseObserver(Integrator):
@@ -117,6 +117,10 @@ class BaseObserver(Integrator):
     def make_observations(
         self, number: int, frequency: float, transient: float = 0, timer: bool = False
     ) -> None:
+
+        if isinstance(number, float):
+            number = int(number)
+
         # Determine if we need to run a transient
         if self.have_I_run_a_transient and transient > 0:
             logger.warning(
