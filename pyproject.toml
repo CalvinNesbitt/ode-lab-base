@@ -1,8 +1,87 @@
-[build-system]
-requires = ["setuptools", "wheel"]
+[project]
+name = "ode-lab-base"
+dynamic = ["version"]
+description = "A package for solving ordinary differential equations with scipy and packaging the results with xarray."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = ["keywords"]
+authors = [
+  {name = "Calvin Nesbitt", email = "cf.nesbitt94@gmail.com" },
+]
+
+# For a list of valid classifiers, see https://pypi.org/classifiers/
+classifiers = [
+  "Development Status :: 3 - Alpha",
+]
+
+dependencies = [
+    "scipy",
+    "numpy",
+    "xarray",
+    "tqdm",
+    "ipykernel"
+]
+
+
+[project.optional-dependencies] # Optional
+dev = [
+  "pre-commit",
+  "black",
+  "pytest",
+  "pytest-order",
+  "pytest-asyncio",
+  "pytest-cov",
+  "mypy",
+  "tox",
+  "coverage",
+  "types-requests",
+  "python-dotenv",
+  ]
+
+
+[project.urls]  # Optional
+"Homepage" = "https://github.com/CalvinNesbitt/ode-lab-base"
+"Bug Reports" = "https://github.com/CalvinNesbitt/ode-lab-base/issues"
+"Source" = "https://github.com/CalvinNesbitt/ode-lab-base"
+
+# The following would provide a command line executable called `cli`
+# which executes the function `main` from this package when invoked.
+[project.scripts]  # Optional
+cli = "cli.cli:main"
+
+# This is configuration specific to the `setuptools` build backend.
+# If you are using a different build backend, you will need to change this.
+[tool.setuptools]
+# If there are data files included in your packages that need to be
+# installed, specify them here.
+# package-data = {"sample" = ["*.dat"]}
+
+[tool.setuptools.packages]
+find = {}
 
 
 [tool.pytest.ini_options]
-filterwarnings = [
-    "ignore::DeprecationWarning",
+python_files = [
+    "test_*.py",
+    "*_test.py",
+    "tests.py",
 ]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--doctest-modules",
+    "--doctest-glob=\\*.rst",
+]
+testpaths = [
+    "tests"
+]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
