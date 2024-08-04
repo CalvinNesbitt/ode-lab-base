@@ -14,7 +14,6 @@ class BaseObserver:
     def __init__(
         self,
         integrator: Integrator,
-        observing_function: int | None = None,
         observable_names: list["str"] | None = None,
         log_level: str = "INFO",
         log_file: str | None = None,
@@ -29,15 +28,8 @@ class BaseObserver:
         """
         self.integrator = integrator
 
-        if observing_function is None:
-            raise ValueError("An observing function must be provided.")
-
-        self.observing_function = observing_function
-
         # Observable info
-        self.observable_output_dimension = len(
-            self.observing_function(self.integrator.state, self.integrator.time)
-        )
+        self.observable_output_dimension = len(self.observing_function(self.integrator))
         if observable_names is None:
             observable_names = [
                 f"O_{i}" for i in range(self.observable_output_dimension)
@@ -63,22 +55,7 @@ class BaseObserver:
         if log_file is not None:
             self.set_log_file(log_file)
 
-    def observing_function(self, state: np.ndarray, time: float) -> np.ndarray:
-        """
-        Function to observe the state of the system at a given time.
-
-        Parameters
-        ----------
-        state : np.ndarray
-            The state of the system.
-        time : float
-            The time at which the observation is made.
-
-        Returns
-        -------
-        np.ndarray
-            The observation made at the given time.
-        """
+    def observing_function(self, integrator: Integrator) -> np.ndarray:
         raise NotImplementedError
 
     @property
@@ -104,9 +81,7 @@ class BaseObserver:
     def look(self) -> None:
         """Look at the integrator state and store observations"""
         self._time_obs.append(self.integrator.time)
-        observation = self.observing_function(
-            self.integrator.state, self.integrator.time
-        )
+        observation = self.observing_function(self.integrator)
         self._observations.append(observation)
         return
 
@@ -245,5 +220,7 @@ class TrajectoryObserver(BaseObserver):
             observable_names=observable_names,
             log_level=log_level,
             log_file=log_file,
-            observing_function=lambda state, _: state,
         )
+
+    def observing_function(self, integrator: Integrator) -> np.ndarray:
+        return integrator.state
