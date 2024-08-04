@@ -13,10 +13,7 @@ from ode_lab.base.logger import logger
 class BaseObserver:
     def __init__(
         self,
-        rhs: Callable,
-        ic: np.ndarray | list,
-        parameters: dict | None = None,
-        method: str = "DOP853",
+        integrator: Integrator,
         observable_names: list["str"] | None = None,
         log_level: str = "INFO",
         log_file: str | None = None,
@@ -27,20 +24,9 @@ class BaseObserver:
 
         Parameters
         ----------
-        rhs : function
-            The rhs of our ODE system.
-            Expected to be of the form rhs(x, **parameters).
-        ic : np.array| list
-            The ic for our IVP.
-        parameters: dict, optional
-            Parameters of our ode.
-            {'foo' : bar} will be passed as rhs(foo=bar).
-        method: string, optional
-            The scheme we use to integrate our IVP.
+
         """
-        self.integrator = Integrator(
-            rhs=rhs, ic=ic, parameters=parameters, method=method
-        )
+        self.integrator = integrator
 
         # Observable info
         self.observable_output_dimension = len(
@@ -247,11 +233,10 @@ class TrajectoryObserver(BaseObserver):
         if observable_names is None:
             observable_names = [f"X_{i}" for i in range(len(ic))]
 
+        integrator = Integrator(rhs=rhs, ic=ic, parameters=parameters, method=method)
+
         super().__init__(
-            rhs=rhs,
-            ic=ic,
-            parameters=parameters,
-            method=method,
+            integrator=integrator,
             observable_names=observable_names,
             log_level=log_level,
             log_file=log_file,
