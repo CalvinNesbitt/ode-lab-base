@@ -14,6 +14,7 @@ class BaseObserver:
     def __init__(
         self,
         integrator: Integrator,
+        observing_function: int | None = None,
         observable_names: list["str"] | None = None,
         log_level: str = "INFO",
         log_file: str | None = None,
@@ -27,6 +28,11 @@ class BaseObserver:
 
         """
         self.integrator = integrator
+
+        if observing_function is None:
+            raise ValueError("An observing function must be provided.")
+
+        self.observing_function = observing_function
 
         # Observable info
         self.observable_output_dimension = len(
@@ -234,13 +240,10 @@ class TrajectoryObserver(BaseObserver):
             observable_names = [f"X_{i}" for i in range(len(ic))]
 
         integrator = Integrator(rhs=rhs, ic=ic, parameters=parameters, method=method)
-
         super().__init__(
             integrator=integrator,
             observable_names=observable_names,
             log_level=log_level,
             log_file=log_file,
+            observing_function=lambda state, _: state,
         )
-
-    def observing_function(self, state: np.ndarray, time: float) -> np.ndarray:
-        return state
