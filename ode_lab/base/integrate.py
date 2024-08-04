@@ -1,4 +1,5 @@
 # Imports
+import inspect
 from typing import Callable
 
 import numpy as np
@@ -65,7 +66,12 @@ class Integrator:
         self.state = ic
 
         if parameters is None:
-            parameters = {}
+            sig = inspect.signature(rhs)
+            parameters = {
+                k: sig.parameters[k].default
+                for k in sig.parameters.keys()
+                if k != "state"
+            }
         self.parameters = parameters
 
         self.time = 0
