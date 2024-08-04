@@ -117,7 +117,6 @@ class BaseObserver(Integrator):
     def make_observations(
         self, number: int, frequency: float, transient: float = 0, timer: bool = False
     ) -> None:
-
         if isinstance(number, float):
             number = int(number)
 
