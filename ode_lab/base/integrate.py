@@ -65,13 +65,12 @@ class Integrator:
         self.ic = ic
         self.state = ic
 
-        if parameters is None:
-            sig = inspect.signature(rhs)
-            parameters = {
-                k: sig.parameters[k].default
-                for k in sig.parameters.keys()
-                if k != "state"
-            }
+        # Check if we have all the parameters in the signature
+        sig = inspect.signature(rhs)
+        param_keys = [k for k in sig.parameters.keys() if k != "state"]
+        for k in param_keys:
+            if k not in parameters:
+                parameters[k] = sig.parameters[k].default
         self.parameters = parameters
 
         self.time = 0
