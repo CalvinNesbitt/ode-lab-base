@@ -10,7 +10,7 @@ from ode_lab.base.integrate import Integrator
 from ode_lab.base.logger import logger
 
 
-class BaseObserver(Integrator):
+class BaseObserver:
     def __init__(
         self,
         rhs: Callable,
@@ -38,11 +38,13 @@ class BaseObserver(Integrator):
         method: string, optional
             The scheme we use to integrate our IVP.
         """
-        super().__init__(rhs=rhs, ic=ic, parameters=parameters, method=method)
+        self.integrator = Integrator(
+            rhs=rhs, ic=ic, parameters=parameters, method=method
+        )
 
         # Observable info
         self.observable_output_dimension = len(
-            self.observing_function(self.state, self.time)
+            self.observing_function(self.integrator.state, self.integrator.time)
         )
         if observable_names is None:
             observable_names = [
@@ -105,12 +107,14 @@ class BaseObserver(Integrator):
                 dims=["time"],
                 coords={"time": self._time_obs},
             )
-        return xr.Dataset(data_var_dict, attrs=self.parameters)
+        return xr.Dataset(data_var_dict, attrs=self.integrator.parameters)
 
     def look(self) -> None:
         """Look at the integrator state and store observations"""
-        self._time_obs.append(self.time)
-        observation = self.observing_function(self.state, self.time)
+        self._time_obs.append(self.integrator.time)
+        observation = self.observing_function(
+            self.integrator.state, self.integrator.time
+        )
         self._observations.append(observation)
         return
 
@@ -127,15 +131,15 @@ class BaseObserver(Integrator):
             )
             transient = 0
         if transient > 0:
-            self.run(transient)  # No observations for transient
-            self.time = 0  # Reset time
+            self.integrator.run(transient)  # No observations for transient
+            self.integrator.time = 0  # Reset time
             self.have_I_run_a_transient = True
 
         # Make observations
         self.look()  # Initial observation
         logger.info(f"Making {number} observations with frequency {frequency}.")
         for _ in tqdm(range(number), disable=not timer):
-            self.run(frequency)
+            self.integrator.run(frequency)
             self.look()
         return
 
