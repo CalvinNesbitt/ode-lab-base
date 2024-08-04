@@ -1,6 +1,6 @@
 import numpy as np
 
-from ode_lab.observe import TrajectoryObserver
+from ode_lab.base.observe import TrajectoryObserver
 
 
 def test_observe_1d(linear_ode_1d):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ode_lab.integrate import Integrator
+from ode_lab.base.integrate import Integrator
 
 
 def test_integrator_1d(linear_ode_1d):

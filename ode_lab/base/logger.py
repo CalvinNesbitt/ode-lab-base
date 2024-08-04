@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger("ode_lab")
+logger = logging.getLogger("ode-lab-base")
 logger.setLevel(logging.DEBUG)
 
 
