@@ -7,14 +7,14 @@ def test_observe_1d(linear_ode_1d):
     dt = 0.1
     rhs, solution, initial_condition, parameters = linear_ode_1d
     observer = TrajectoryObserver(rhs, initial_condition, parameters)
-    assert observer.ndim == 1
+    assert observer.integrator.ndim == 1
 
     # Check we pack things correctly
-    assert observer.time == 0.0
-    assert np.allclose(observer.state, initial_condition)
-    assert isinstance(observer.state, np.ndarray)
-    assert observer.parameters == parameters
-    assert observer.rhs == rhs
+    assert observer.integrator.time == 0.0
+    assert np.allclose(observer.integrator.state, initial_condition)
+    assert isinstance(observer.integrator.state, np.ndarray)
+    assert observer.integrator.parameters == parameters
+    assert observer.integrator.rhs == rhs
 
     # Check we can integrate
     n1 = 10
@@ -38,14 +38,14 @@ def test_observe_2d(linear_ode_2d):
     dt = 0.1
     rhs, solution, initial_condition, parameters = linear_ode_2d
     observer = TrajectoryObserver(rhs, initial_condition, parameters)
-    assert observer.ndim == 2
+    assert observer.integrator.ndim == 2
 
     # Check we pack things correctly
-    assert observer.time == 0.0
-    assert np.allclose(observer.state, initial_condition)
-    assert isinstance(observer.state, np.ndarray)
-    assert observer.parameters == parameters
-    assert observer.rhs == rhs
+    assert observer.integrator.time == 0.0
+    assert np.allclose(observer.integrator.state, initial_condition)
+    assert isinstance(observer.integrator.state, np.ndarray)
+    assert observer.integrator.parameters == parameters
+    assert observer.integrator.rhs == rhs
 
     # Check we can integrate
     n1 = 10
