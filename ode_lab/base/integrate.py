@@ -59,18 +59,18 @@ class Integrator:
             The scheme we use to integrate our IVP.
         """
         self.rhs = rhs
-
         if isinstance(ic, list):
             ic = np.array(ic)
         self.ic = ic
         self.state = ic
 
-        # Check if we have all the parameters in the signature
+        # Assume first parameter is state, and rest are args/kwargs.
         sig = inspect.signature(rhs)
-        param_keys = [k for k in sig.parameters.keys() if k != "state"]
+        param_keys = list(sig.parameters.keys())[1:]
         for k in param_keys:
             if k not in parameters:
                 parameters[k] = sig.parameters[k].default
+
         self.parameters = parameters
 
         self.time = 0
