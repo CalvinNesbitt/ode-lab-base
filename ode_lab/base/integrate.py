@@ -67,9 +67,13 @@ class Integrator:
         # Assume first parameter is state, and rest are args/kwargs.
         sig = inspect.signature(rhs)
         param_keys = list(sig.parameters.keys())[1:]
-        for k in param_keys:
-            if k not in parameters:
-                parameters[k] = sig.parameters[k].default
+
+        if parameters is None:
+            parameters = {k: sig.parameters[k].default for k in param_keys}
+        else:
+            for k in param_keys:
+                if k not in parameters:
+                    parameters[k] = sig.parameters[k].default
 
         self.parameters = parameters
 
