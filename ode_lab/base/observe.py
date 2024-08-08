@@ -1,19 +1,17 @@
 import logging
 from pathlib import Path
-from typing import Callable, Union
+from typing import Union
 
 import numpy as np
 import xarray as xr
-from tqdm import tqdm
 
 from ode_lab.base.integrate import Integrator
 from ode_lab.base.logger import logger
 
 
-class BaseObserver:
+class Observer:
     def __init__(
         self,
-        integrator: Integrator,
         observable_names: list["str"] | None = None,
         log_level: str = "INFO",
         log_file: str | None = None,
@@ -26,28 +24,12 @@ class BaseObserver:
         ----------
 
         """
-        self.integrator = integrator
-
-        # Observable info
-        self.observable_output_dimension = len(self.observing_function(self.integrator))
-        if observable_names is None:
-            observable_names = [
-                f"O_{i}" for i in range(self.observable_output_dimension)
-            ]
         self.observable_names = observable_names
-        try:
-            assert len(self.observable_names) == self.observable_output_dimension
-        except AssertionError:
-            raise ValueError(
-                "The number of observable names must match"
-                + "the output dimension of the observable function."
-            )
-
         # Observation logs
         self._time_obs = []  # Times we've made observations
         self._observations = []
         self.number_of_saves = 0
-        self.have_I_run_a_transient = False
+        self.attrs = None
 
         # Set up logging
         self.logger = logger
@@ -76,38 +58,17 @@ class BaseObserver:
                 dims=["time"],
                 coords={"time": self._time_obs},
             )
-        return xr.Dataset(data_var_dict, attrs=self.integrator.parameters)
+        return xr.Dataset(data_var_dict, attrs=self.attrs)
 
-    def look(self) -> None:
+    def look(self, integrator: Integrator) -> None:
         """Look at the integrator state and store observations"""
-        self._time_obs.append(self.integrator.time)
-        observation = self.observing_function(self.integrator)
+        self._time_obs.append(integrator.time)
+        observation = self.observing_function(integrator)
         self._observations.append(observation)
         return
 
-    def make_observations(
-        self, number: int, frequency: float, transient: float = 0, timer: bool = False
-    ) -> None:
-        if isinstance(number, float):
-            number = int(number)
-
-        # Determine if we need to run a transient
-        if self.have_I_run_a_transient and transient > 0:
-            logger.warning(
-                "I've already run a transient! I'm going to ignore this one."
-            )
-            transient = 0
-        if transient > 0:
-            self.integrator.run(transient)  # No observations for transient
-            self.integrator.time = 0  # Reset time
-            self.have_I_run_a_transient = True
-
-        # Make observations
-        self.look()  # Initial observation
-        logger.info(f"Making {number} observations with frequency {frequency}.")
-        for _ in tqdm(range(number), disable=not timer):
-            self.integrator.run(frequency)
-            self.look()
+    def observe_attributes(self, integrator: Integrator) -> None:
+        self.attrs = integrator.parameters
         return
 
     def wipe_observations(self):
@@ -200,27 +161,6 @@ class BaseObserver:
         self.logger.addHandler(file_handler)
 
 
-class TrajectoryObserver(BaseObserver):
-    def __init__(
-        self,
-        rhs: Callable,
-        ic: np.ndarray | list,
-        parameters: dict | None = None,
-        method: str = "DOP853",
-        observable_names: list["str"] | None = None,
-        log_level: str = "INFO",
-        log_file: str | None = None,
-    ):
-        if observable_names is None:
-            observable_names = [f"X_{i}" for i in range(len(ic))]
-
-        integrator = Integrator(rhs=rhs, ic=ic, parameters=parameters, method=method)
-        super().__init__(
-            integrator=integrator,
-            observable_names=observable_names,
-            log_level=log_level,
-            log_file=log_file,
-        )
-
+class TrajectoryObserver(Observer):
     def observing_function(self, integrator: Integrator) -> np.ndarray:
         return integrator.state
